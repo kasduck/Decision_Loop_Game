@@ -31,6 +31,11 @@
             image-rendering: crisp-edges;
         }
 
+        body.colorblind .survival-fill { background: #a3a3ff !important; }
+body.colorblind .risk-fill { background: #ffd580 !important; }
+body.colorblind .multiplier-fill { background: #ffb3e6 !important; }
+body.dark { background: #333 !important; }
+
         .crt-overlay {
             position: fixed;
             top: 0;
@@ -505,6 +510,8 @@
             letter-spacing: 2px;
         }
 
+        .mind-coins { position: absolute; top: 10px; left: 10px; font-size: 22px; color: #ffff00; z-index: 20; }
+
         @media (max-width: 768px) {
             .prompt { font-size: 48px; }
             .score { font-size: 24px; top: 30px; right: 30px; }
@@ -515,6 +522,149 @@
             .start-btn { font-size: 20px; padding: 20px 30px; }
             .level-indicator, .combo-counter { font-size: 14px; }
         }
+
+        /* Settings button and modal */
+        .settings-btn {
+            position: absolute;
+            top: 50px;
+            right: 120px;
+            z-index: 30;
+            background: #222;
+            color: #fff;
+            border: 2px solid #00ff00;
+            font-size: 22px;
+            padding: 8px 14px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .settings-btn:hover {
+            color: #ff00ff;
+        }
+
+        .settings-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%,-50%);
+            background: #111;
+            color: #fff;
+            border: 4px solid #00ff00;
+            z-index: 1001;
+            padding: 32px 40px;
+            min-width: 320px;
+            box-shadow: 0 0 40px #00ff00;
+            display: none;
+        }
+
+        .settings-modal h2 {
+            color: #ff00ff;
+            font-size: 28px;
+            font-weight: 900;
+            margin-bottom: 20px;
+            text-align: center;
+            text-shadow: 0 0 15px currentColor;
+        }
+
+        .settings-modal label {
+            display: block;
+            margin: 12px 0;
+            font-size: 18px;
+        }
+
+        .settings-modal input {
+            margin-right: 10px;
+        }
+
+        .settings-modal button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: #ff00ff;
+            border: none;
+            color: #000;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 0 15px rgba(255, 0, 255, 0.5);
+        }
+
+        .settings-modal button:hover {
+            background: #00ff00;
+            color: #000;
+            box-shadow: 0 0 25px rgba(0, 255, 0, 0.6);
+        }
+
+        .glitch-static { animation: static-flicker 0.1s infinite; }
+@keyframes static-flicker { 0% { opacity: 0.7; } 100% { opacity: 1; } }
+
+.achievement-popup {
+    position: fixed; top: 20%; left: 50%; transform: translateX(-50%);
+    background: #222; color: #ff0; border: 2px solid #ff0; padding: 18px 32px;
+    font-size: 22px; font-weight: bold; z-index: 3000; box-shadow: 0 0 20px #ff0;
+    animation: popup-fade 2.5s;
+}
+@keyframes popup-fade { 0% { opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { opacity: 0; } }
+
+.leaderboard-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    background: #111;
+    color: #fff;
+    border: 4px solid #00ff00;
+    z-index: 1001;
+    padding: 32px 40px;
+    min-width: 320px;
+    box-shadow: 0 0 40px #00ff00;
+    display: none;
+}
+
+.leaderboard-modal h2 {
+    color: #ff00ff;
+    font-size: 28px;
+    font-weight: 900;
+    margin-bottom: 20px;
+    text-align: center;
+    text-shadow: 0 0 15px currentColor;
+}
+
+.leaderboard-modal ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.leaderboard-modal li {
+    padding: 10px;
+    border-bottom: 1px solid #00ff00;
+}
+
+.leaderboard-modal button {
+    margin-top: 20px;
+    padding: 10px 20px;
+    background: #ff00ff;
+    border: none;
+    color: #000;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 0 15px rgba(255, 0, 255, 0.5);
+}
+
+.leaderboard-modal button:hover {
+    background: #00ff00;
+    color: #000;
+    box-shadow: 0 0 25px rgba(0, 255, 0, 0.6);
+}
     </style>
 </head>
 <body>
@@ -536,7 +686,7 @@
 
         <div class="timer-ring" id="timerRing"></div>
         
-        <div class="prompt" id="prompt">TAP</div>
+        <div class="prompt" id="prompt" aria-live="polite" aria-label="Game Prompt">TAP</div>
         
         <div class="score" id="score">SCORE: 0</div>
         <div class="level-indicator" id="levelIndicator">LEVEL: 1</div>
@@ -576,6 +726,29 @@
             <p>>>> PRESS TO CONTINUE <<<</p>
             <button class="restart-btn" onclick="restartGame()">► RESTART ◄</button>
         </div>
+
+        <!-- Add settings button -->
+        <button class="settings-btn" id="settingsBtn" aria-label="Settings">⚙️</button>
+        
+        <!-- Settings modal -->
+        <div class="settings-modal" id="settingsModal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle" style="display:none;">
+          <h2 id="settingsTitle">Settings</h2>
+          <label><input type="checkbox" id="tiltToggle"> Enable Tilt Input</label><br>
+          <label><input type="checkbox" id="colorblindToggle"> Colorblind Mode</label><br>
+          <label><input type="checkbox" id="darkModeToggle"> Dark Mode</label><br>
+          <label><input type="checkbox" id="mindChallengeToggle"> Mind Challenges</label><br>
+          <label><input type="checkbox" id="gdprToggle"> Opt-in Leaderboard</label><br>
+          <button onclick="closeSettings()">Close</button>
+        </div>
+
+        <!-- Leaderboard modal -->
+        <div class="leaderboard-modal" id="leaderboardModal" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="leaderboardTitle">
+          <h2 id="leaderboardTitle">Leaderboard</h2>
+          <ul id="leaderboardList"></ul>
+          <button onclick="closeLeaderboard()">Close</button>
+        </div>
+
+        <div class="mind-coins" id="mindCoins" aria-label="Mind Coins">🧠 0</div>
     </div>
 
     <script>
@@ -646,6 +819,13 @@
             oscillator.stop(audioContext.currentTime + duration);
         }
 
+        function playWav(name) {
+            let audio = new Audio(name);
+            audio.playbackRate = Math.min(2, 1 + (gameState.multiplier - 1) * 0.1);
+            audio.volume = 0.5;
+            audio.play();
+        }
+
         function startGame() {
             initAudio();
             document.getElementById('tutorial').style.display = 'none';
@@ -707,17 +887,13 @@
         function generatePrompt() {
             const rand = Math.random();
             let promptType;
-            
-            // Level-based difficulty progression
-            const levelDifficulty = Math.min(gameState.level / 10, 0.6);
-            const reverseChance = 0.2 + levelDifficulty;
-            
-            if (rand < 0.7 - levelDifficulty) {
-                promptType = 'basic';
-            } else {
-                promptType = 'reverse';
+            if (rand < 0.6) promptType = 'basic';
+            else if (rand < 0.9) promptType = 'reverse';
+            else promptType = 'special';
+            // Pattern injection
+            if (gameState.patterns.length && gameState.totalPrompts % 10 === 0) {
+                return gameState.patterns[gameState.patternIndex++ % gameState.patterns.length];
             }
-            
             const promptList = prompts[promptType];
             return promptList[Math.floor(Math.random() * promptList.length)];
         }
@@ -729,6 +905,7 @@
             gameState.promptStartTime = Date.now();
             gameState.promptCount++;
             gameState.totalPrompts++;
+            if (gameState.totalPrompts === 100) showPatternJournal();
             
             // Level progression
             if (gameState.totalPrompts % 20 === 0) {
@@ -844,6 +1021,8 @@
         function checkInput(input, prompt) {
             if (prompt === 'DON\'T TAP' && input === 'TAP') return false;
             if (prompt === 'DON\'T TAP' && input !== 'TAP') return true;
+            if (prompt === 'HOLD' && input === 'HOLD') return true;
+            if (prompt === 'DOUBLE TAP' && input === 'DOUBLE TAP') return true;
             return input === prompt;
         }
 
@@ -881,11 +1060,9 @@
             }
             
             // Visual feedback effects
-            if (gameState.survival >= 95) {
+            if (gameState.survival < 10 || gameState.survival > 90) {
                 document.getElementById('survivalBar').parentElement.classList.add('shake');
-                setTimeout(() => {
-                    document.getElementById('survivalBar').parentElement.classList.remove('shake');
-                }, 600);
+                setTimeout(() => document.getElementById('survivalBar').parentElement.classList.remove('shake'), 600);
             }
             
             // Perfect streak bonus
@@ -893,6 +1070,7 @@
                 playRetroSound(880, 0.2, 'square');
                 setTimeout(() => playRetroSound(1100, 0.2, 'square'), 100);
             }
+            if (Math.random() < 0.2) addMindCoins(1 + Math.floor(Math.random() * 10));
         }
 
         function handleIncorrectInput() {
@@ -1000,7 +1178,9 @@
 
         function gameOver() {
             gameState.isPlaying = false;
-            
+            document.body.style.filter = 'grayscale(1)';
+            setTimeout(() => document.body.style.filter = '', 2000);
+            playWav('static.wav');
             // Update best score
             if (gameState.score > gameState.bestScore) {
                 gameState.bestScore = gameState.score;
@@ -1066,6 +1246,192 @@
             }
             lastTouchEnd = now;
         }, false);
+
+        // Settings functionality
+        let settings = JSON.parse(localStorage.getItem('retroSettings') || '{}');
+        function saveSettings() { localStorage.setItem('retroSettings', JSON.stringify(settings)); }
+        function openSettings() {
+            document.getElementById('settingsModal').style.display = 'block';
+            document.getElementById('tiltToggle').checked = !!settings.tilt;
+            document.getElementById('colorblindToggle').checked = !!settings.colorblind;
+            document.getElementById('darkModeToggle').checked = !!settings.dark;
+            document.getElementById('mindChallengeToggle').checked = !!settings.mindChallenge;
+            document.getElementById('gdprToggle').checked = !!settings.gdpr;
+        }
+        function closeSettings() { document.getElementById('settingsModal').style.display = 'none'; }
+        document.getElementById('settingsBtn').onclick = openSettings;
+        document.getElementById('tiltToggle').onchange = e => { settings.tilt = e.target.checked; saveSettings(); };
+        document.getElementById('colorblindToggle').onchange = e => { settings.colorblind = e.target.checked; applyColorblind(); saveSettings(); };
+        document.getElementById('darkModeToggle').onchange = e => { settings.dark = e.target.checked; applyDarkMode(); saveSettings(); };
+        document.getElementById('mindChallengeToggle').onchange = e => { settings.mindChallenge = e.target.checked; saveSettings(); };
+        document.getElementById('gdprToggle').onchange = e => { settings.gdpr = e.target.checked; saveSettings(); };
+
+        if (window.DeviceOrientationEvent) {
+    window.addEventListener('deviceorientation', function(e) {
+        if (!gameState.isPlaying || !settings.tilt) return;
+        if (Math.abs(e.gamma) > 15) {
+            if (e.gamma > 15) handleInput('→');
+            else if (e.gamma < -15) handleInput('←');
+        }
+    });
+}
+
+let holdTimeout, doubleTapTimeout, lastTapTime = 0;
+document.addEventListener('mousedown', e => {
+    if (gameState.currentPrompt === 'HOLD') {
+        holdTimeout = setTimeout(() => handleInput('HOLD'), 500);
+    }
+});
+document.addEventListener('mouseup', e => {
+    if (gameState.currentPrompt === 'HOLD') {
+        clearTimeout(holdTimeout);
+    }
+});
+document.addEventListener('touchstart', e => {
+    if (gameState.currentPrompt === 'HOLD') {
+        holdTimeout = setTimeout(() => handleInput('HOLD'), 500);
+    }
+});
+document.addEventListener('touchend', e => {
+    if (gameState.currentPrompt === 'HOLD') {
+        clearTimeout(holdTimeout);
+    }
+    // Double tap
+    const now = Date.now();
+    if (gameState.currentPrompt === 'DOUBLE TAP') {
+        if (now - lastTapTime < 300) {
+            handleInput('DOUBLE TAP');
+            lastTapTime = 0;
+        } else {
+            lastTapTime = now;
+        }
+    }
+});
+
+gameState.patterns = ['TAP', '↑', 'DON\'T TAP'];
+gameState.patternIndex = 0;
+// After 100 prompts, show pattern journal
+function showPatternJournal() {
+    alert('Pattern Journal:\n' + gameState.patterns.join(', '));
+    gameState.survival = Math.min(100, gameState.survival + 10);
+    updateUI();
+}
+if (gameState.totalPrompts === 100) showPatternJournal();
+
+function maybeGlitchMode() {
+    if (gameState.consecutiveCorrect > 50 && Math.random() < 0.01) {
+        document.body.classList.add('glitch');
+        const staticOverlay = document.createElement('div');
+        staticOverlay.className = 'crt-overlay glitch-static';
+        staticOverlay.style.background = 'url(static.png), rgba(0,0,0,0.2)';
+        staticOverlay.style.zIndex = 2000;
+        document.body.appendChild(staticOverlay);
+        setTimeout(() => {
+            document.body.classList.remove('glitch');
+            staticOverlay.remove();
+            addMindCoins(500);
+            showAchievement('Glitch Survivor!');
+        }, 3000);
+    }
+}
+
+const mindChallenges = [
+    { name: "Only use left hand", effect: () => gameState.score += Math.floor(gameState.score * 0.1) },
+    { name: "Tilt to survive", effect: () => gameState.risk = Math.min(100, gameState.risk + 15) },
+    { name: "No swipes", effect: () => gameState.survival = Math.min(100, gameState.survival + 20) }
+];
+function maybeActivateMindChallenge() {
+    if (settings.mindChallenge && Math.random() < 0.05) {
+        const idx = Math.floor(Math.random() * mindChallenges.length);
+        gameState.activeChallenge = mindChallenges[idx];
+        showAchievement('Mind Challenge: ' + gameState.activeChallenge.name);
+    }
+}
+// Call maybeActivateMindChallenge() at game start
+
+let prestige = JSON.parse(localStorage.getItem('retroPrestige') || '{"level":0}');
+function tryPrestige() {
+    if (gameState.score >= 10000) {
+        prestige.level++;
+        localStorage.setItem('retroPrestige', JSON.stringify(prestige));
+        showAchievement('Prestige Level Up! Now Level ' + prestige.level);
+        // Apply perks
+        if (prestige.level === 1) gameState.gameSpeed += 100;
+        if (prestige.level === 2) gameState.survival += 5;
+        if (prestige.level === 3) gameState.mindCoinMultiplier = 2;
+        restartGame();
+    }
+}
+// Add a "Prestige" button to game over modal if eligible
+
+let mindCoins = parseInt(localStorage.getItem('retroMindCoins') || '0');
+function addMindCoins(amount) {
+    mindCoins += amount * (prestige.level >= 3 ? 2 : 1);
+    localStorage.setItem('retroMindCoins', mindCoins);
+    updateMindCoinUI();
+    playWav('coin.wav');
+}
+function updateMindCoinUI() {
+    const el = document.getElementById('mindCoins');
+    if (el) el.textContent = `🧠 ${mindCoins}`;
+}
+
+function showAchievement(text) {
+    const el = document.createElement('div');
+    el.className = 'achievement-popup';
+    el.textContent = text;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 2500);
+}
+
+const mockNames = ["YourEx", "BrokeCoder", "TryHarder", "NoSleep", "Procrastinator"];
+function updateLeaderboard() {
+    if (!settings.gdpr) return;
+    let userScore = gameState.score;
+    let scores = [];
+    for (let i = 0; i < 3; i++) {
+        scores.push({ name: mockNames[i], score: userScore + (1000 * (3 - i)) });
+    }
+    scores.push({ name: "You", score: userScore });
+    document.getElementById('leaderboardList').innerHTML = scores.map(s => `<li>${s.name}: ${s.score}</li>`).join('');
+}
+document.getElementById('leaderboardBtn').onclick = function() {
+    if (!settings.gdpr) { alert('Opt-in via settings to view leaderboard.'); return; }
+    updateLeaderboard();
+    document.getElementById('leaderboardModal').style.display = 'block';
+};
+function closeLeaderboard() { document.getElementById('leaderboardModal').style.display = 'none'; }
+setInterval(updateLeaderboard, 10000);
+
+let idleXP;
+try {
+    idleXP = JSON.parse(localStorage.getItem('retroIdleXP'));
+    if (!idleXP || typeof idleXP.xp !== 'number' || typeof idleXP.last !== 'number') {
+        idleXP = { xp: 0, last: Date.now() };
+    }
+} catch (e) {
+    idleXP = { xp: 0, last: Date.now() };
+}
+function updateIdleXP() {
+    let now = Date.now();
+    let hours = Math.floor((now - idleXP.last) / 3600000);
+    let addXP = Math.min(24, hours) * 10;
+    if (addXP > 0) {
+        idleXP.xp += addXP;
+        idleXP.last = now;
+        localStorage.setItem('retroIdleXP', JSON.stringify(idleXP));
+        if (addXP >= 120) alert(`+${addXP} XP waiting!`);
+    }
+}
+window.addEventListener('focus', updateIdleXP);
+
+if ('getBattery' in navigator) {
+    navigator.getBattery().then(battery => {
+        if (battery.level < 0.2 || battery.saveMode) {
+            document.querySelector('.crt-overlay').style.display = 'none';
+        }
+    });
+}
     </script>
 </body>
 </html>
