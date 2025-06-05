@@ -1100,6 +1100,8 @@ body.dark { background: #333 !important; }
                 gameOver();
             } else {
                 playRetroSound(100, 0.3, 'sawtooth');
+                updateUI(); // Add this to update bars
+                setTimeout(nextPrompt, 300); // Add this line
             }
         }
 
@@ -1232,6 +1234,8 @@ body.dark { background: #333 !important; }
         // Initialize best score display
         document.addEventListener('DOMContentLoaded', () => {
             gameState.bestScore = parseInt(localStorage.getItem('retroBestScore') || '0');
+            applyColorblind();
+            applyDarkMode();
         });
 
         // Prevent context menu on mobile
@@ -1431,6 +1435,22 @@ if ('getBattery' in navigator) {
             document.querySelector('.crt-overlay').style.display = 'none';
         }
     });
+}
+
+function applyColorblind() {
+    if (settings.colorblind) {
+        document.body.classList.add('colorblind');
+    } else {
+        document.body.classList.remove('colorblind');
+    }
+}
+
+function applyDarkMode() {
+    if (settings.dark) {
+        document.body.classList.add('dark');
+    } else {
+        document.body.classList.remove('dark');
+    }
 }
     </script>
 </body>
