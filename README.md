@@ -18,7 +18,7 @@ This isn’t just a game—it’s a cyberpunk rebellion. With glowing neon green
    ╚════════════════════════════════════╝
 ```
 
-![Game Screenshot](https://via.placeholder.com/600x300.png?text=DECISION+LOOP+Gameplay)  
+![Game Screenshot](https://raw.githubusercontent.com/kasduck/Decision_Loop_Game/refs/heads/main/SS1.png)  
 *Replace with a screenshot hosted on GitHub/Imgur for max impact.*
 
 ---
@@ -84,7 +84,7 @@ Ready to hack the Grid? Follow these steps:
 4. **Start the Loop**: Tap **START GAME** on the tutorial screen. Follow prompts, survive, and dominate.
 5. **Tweak Settings**: Hit ⚙️ to toggle tilt, colorblind mode, dark mode, mind challenges, or GDPR opt-in.
 
-![Settings Modal](https://via.placeholder.com/400x200.png?text=Settings+Modal)  
+![Settings Modal](https://raw.githubusercontent.com/kasduck/Decision_Loop_Game/refs/heads/main/SS2.png)  
 *Replace with a hosted image of the settings modal.*
 
 ---
@@ -142,7 +142,7 @@ After 100 prompts, unlock a journal of memorized patterns (e.g., “TAP, ↑, DO
 | **Performance** | 60 FPS on 3GB RAM devices. Low battery mode disables CRT overlay. |
 | **Accessibility** | WCAG 2.1 AA partial compliance (ARIA labels, colorblind mode). |
 
-![Game Over Screen](https://via.placeholder.com/600x300.png?text=Game+Over+Screen)  
+![Game Over Screen](https://raw.githubusercontent.com/kasduck/Decision_Loop_Game/refs/heads/main/SS3.png)  
 *Replace with a hosted game over screenshot.*
 
 ---
@@ -183,5 +183,5 @@ Jack into **DECISION LOOP** and own the Grid. Share your high scores, report gli
 > **“The Grid doesn’t sleep. Neither should you.”**  
 > — Anonymous Neurojacker, 2087
 
-![Neon City](https://via.placeholder.com/800x200.png?text=Neon+City+2087)  
+![Neon City](https://raw.githubusercontent.com/kasduck/Decision_Loop_Game/refs/heads/main/3d-illustration-blue-purple-futuristic-sci-fi-techno-lights-cool-background.jpg)  
 *Replace with a cyberpunk-themed banner.*
