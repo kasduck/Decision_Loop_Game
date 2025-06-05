@@ -180,5 +180,5 @@ Jack into **DECISION LOOP** and own the Grid. Share your high scores, report gli
 > **“The Grid doesn’t sleep. Neither should you.”**  
 > — Anonymous Neurojacker, 2087
 
-![Neon City](https://raw.githubusercontent.com/kasduck/Decision_Loop_Game/refs/heads/main/3d-illustration-blue-purple-futuristic-sci-fi-techno-lights-cool-background.jpg)  
+![Neon City](https://raw.githubusercontent.com/kasduck/Decision_Loop_Game/refs/heads/main/SSS.jpg)  
 *Replace with a cyberpunk-themed banner.*
