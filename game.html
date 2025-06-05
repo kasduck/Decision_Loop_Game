@@ -1,1 +1,1071 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DECISION LOOP - RETRO ARCADE</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
 
+        body {
+            background: #0a0a0a;
+            color: #00ff00;
+            font-family: 'Orbitron', monospace;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+        }
+
+        .crt-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background: 
+                linear-gradient(transparent 50%, rgba(0, 255, 0, 0.03) 50%),
+                linear-gradient(90deg, transparent 50%, rgba(255, 0, 255, 0.03) 50%);
+            background-size: 100% 4px, 4px 100%;
+            animation: scanlines 0.1s linear infinite;
+            z-index: 1000;
+        }
+
+        @keyframes scanlines {
+            0% { background-position: 0 0, 0 0; }
+            100% { background-position: 0 4px, 4px 0; }
+        }
+
+        .game-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: 
+                radial-gradient(circle at center, #001100 0%, #000000 70%),
+                repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 255, 0, 0.02) 2px, rgba(0, 255, 0, 0.02) 4px);
+            border: 8px solid #00ff00;
+            box-shadow: 
+                inset 0 0 50px rgba(0, 255, 0, 0.2),
+                0 0 30px rgba(0, 255, 0, 0.3);
+        }
+
+        .arcade-border {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            bottom: 20px;
+            border: 4px solid #ff00ff;
+            box-shadow: 
+                inset 0 0 20px rgba(255, 0, 255, 0.3),
+                0 0 20px rgba(255, 0, 255, 0.2);
+            pointer-events: none;
+        }
+
+        .timer-ring {
+            position: absolute;
+            width: 220px;
+            height: 220px;
+            border: 8px solid #00ffff;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(1);
+            animation: retro-pulse 1s ease-in-out infinite;
+            z-index: 1;
+            box-shadow: 
+                0 0 30px #00ffff,
+                inset 0 0 30px rgba(0, 255, 255, 0.3);
+        }
+
+        .timer-ring.shrinking {
+            animation: retro-shrink 1s linear forwards;
+        }
+
+        @keyframes retro-pulse {
+            0%, 100% { 
+                transform: translate(-50%, -50%) scale(1); 
+                opacity: 0.7;
+                box-shadow: 0 0 30px #00ffff, inset 0 0 30px rgba(0, 255, 255, 0.3);
+            }
+            50% { 
+                transform: translate(-50%, -50%) scale(1.1); 
+                opacity: 1;
+                box-shadow: 0 0 50px #00ffff, inset 0 0 50px rgba(0, 255, 255, 0.5);
+            }
+        }
+
+        @keyframes retro-shrink {
+            0% { 
+                transform: translate(-50%, -50%) scale(1); 
+                opacity: 1;
+            }
+            100% { 
+                transform: translate(-50%, -50%) scale(0.1); 
+                opacity: 0;
+            }
+        }
+
+        .prompt {
+            font-size: 64px;
+            font-weight: 900;
+            text-align: center;
+            z-index: 2;
+            animation: pixelPop 0.2s ease-out;
+            text-shadow: 
+                0 0 20px currentColor,
+                4px 4px 0px rgba(0, 0, 0, 0.8),
+                8px 8px 0px rgba(0, 0, 0, 0.4);
+            position: relative;
+            letter-spacing: 4px;
+            transform: scale(1, 1.2);
+        }
+
+        @keyframes pixelPop {
+            0% { 
+                transform: scale(0.5, 0.6); 
+                opacity: 0;
+                filter: blur(2px);
+            }
+            50% {
+                transform: scale(1.2, 1.4);
+                filter: blur(1px);
+            }
+            100% { 
+                transform: scale(1, 1.2); 
+                opacity: 1;
+                filter: blur(0px);
+            }
+        }
+
+        .progress-bars {
+            position: absolute;
+            bottom: 60px;
+            width: 85%;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            z-index: 3;
+        }
+
+        .bar-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 8px 12px;
+            border: 2px solid #00ff00;
+            border-radius: 0;
+            box-shadow: 
+                0 0 15px rgba(0, 255, 0, 0.3),
+                inset 0 0 15px rgba(0, 255, 0, 0.1);
+        }
+
+        .bar-label {
+            font-size: 14px;
+            font-weight: 700;
+            width: 100px;
+            text-align: right;
+            color: #00ff00;
+            text-shadow: 0 0 10px currentColor;
+            letter-spacing: 1px;
+        }
+
+        .bar {
+            flex: 1;
+            height: 24px;
+            background: #001100;
+            border: 2px solid #004400;
+            overflow: hidden;
+            position: relative;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.8);
+        }
+
+        .bar-fill {
+            height: 100%;
+            transition: width 0.2s ease;
+            position: relative;
+            background-image: 
+                repeating-linear-gradient(
+                    45deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(255, 255, 255, 0.1) 2px,
+                    rgba(255, 255, 255, 0.1) 4px
+                );
+        }
+
+        .survival-fill { 
+            background-color: #00ff00;
+            box-shadow: 0 0 15px #00ff00;
+        }
+        .risk-fill { 
+            background-color: #ff8800;
+            box-shadow: 0 0 15px #ff8800;
+        }
+        .multiplier-fill { 
+            background-color: #ff00ff;
+            box-shadow: 0 0 15px #ff00ff;
+        }
+
+        .bar-value {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 12px;
+            font-weight: 700;
+            color: #000;
+            text-shadow: none;
+            mix-blend-mode: difference;
+        }
+
+        .score {
+            position: absolute;
+            top: 50px;
+            right: 50px;
+            font-size: 28px;
+            font-weight: 900;
+            color: #00ffff;
+            text-shadow: 
+                0 0 20px #00ffff,
+                4px 4px 0px rgba(0, 0, 0, 0.8);
+            letter-spacing: 2px;
+        }
+
+        .leaderboard-btn {
+            position: absolute;
+            top: 50px;
+            left: 50px;
+            background: #001100;
+            border: 3px solid #00ff00;
+            color: #00ff00;
+            padding: 12px 18px;
+            font-family: 'Orbitron', monospace;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            text-shadow: 0 0 10px currentColor;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.3);
+            letter-spacing: 1px;
+        }
+
+        .leaderboard-btn:hover {
+            background: #00ff00;
+            color: #000;
+            box-shadow: 0 0 25px rgba(0, 255, 0, 0.6);
+            transform: scale(1.05);
+        }
+
+        .game-over {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            background: rgba(0, 0, 0, 0.95);
+            padding: 50px;
+            border: 4px solid #ff00ff;
+            display: none;
+            z-index: 10;
+            box-shadow: 
+                0 0 50px rgba(255, 0, 255, 0.5),
+                inset 0 0 30px rgba(255, 0, 255, 0.2);
+        }
+
+        .game-over h2 {
+            color: #ff00ff;
+            font-size: 48px;
+            font-weight: 900;
+            margin-bottom: 30px;
+            text-shadow: 
+                0 0 30px #ff00ff,
+                4px 4px 0px rgba(0, 0, 0, 0.8);
+            letter-spacing: 3px;
+            animation: glitch-text 2s ease-in-out infinite;
+        }
+
+        @keyframes glitch-text {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-2px); }
+            40% { transform: translateX(2px); }
+            60% { transform: translateX(-1px); }
+            80% { transform: translateX(1px); }
+        }
+
+        .game-over p {
+            font-size: 20px;
+            margin: 15px 0;
+            color: #00ff00;
+            font-weight: 700;
+            text-shadow: 0 0 15px currentColor;
+        }
+
+        .restart-btn {
+            margin-top: 30px;
+            padding: 20px 40px;
+            background: #ff00ff;
+            border: 3px solid #ffffff;
+            color: #000;
+            font-size: 20px;
+            font-weight: 900;
+            font-family: 'Orbitron', monospace;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            box-shadow: 0 0 25px rgba(255, 0, 255, 0.5);
+        }
+
+        .restart-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 35px rgba(255, 0, 255, 0.8);
+        }
+
+        .tutorial {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at center, #000033 0%, #000000 70%),
+                repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 0, 255, 0.02) 2px, rgba(0, 0, 255, 0.02) 4px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 20;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .tutorial h1 {
+            font-size: 72px;
+            font-weight: 900;
+            color: #00ffff;
+            margin-bottom: 40px;
+            text-shadow: 
+                0 0 40px #00ffff,
+                8px 8px 0px rgba(0, 0, 0, 0.8);
+            letter-spacing: 6px;
+            animation: neon-flicker 3s ease-in-out infinite;
+        }
+
+        @keyframes neon-flicker {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+            75% { opacity: 1; }
+            85% { opacity: 0.9; }
+        }
+
+        .tutorial p {
+            font-size: 22px;
+            margin: 20px 0;
+            max-width: 700px;
+            color: #00ff00;
+            font-weight: 700;
+            text-shadow: 0 0 15px currentColor;
+            letter-spacing: 1px;
+        }
+
+        .start-btn {
+            margin-top: 40px;
+            padding: 25px 50px;
+            background: #00ff00;
+            border: 4px solid #ffffff;
+            color: #000;
+            font-size: 28px;
+            font-weight: 900;
+            font-family: 'Orbitron', monospace;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            animation: arcade-pulse 2s ease-in-out infinite;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.6);
+        }
+
+        @keyframes arcade-pulse {
+            0%, 100% { 
+                transform: scale(1);
+                box-shadow: 0 0 30px rgba(0, 255, 0, 0.6);
+            }
+            50% { 
+                transform: scale(1.05);
+                box-shadow: 0 0 50px rgba(0, 255, 0, 0.9);
+            }
+        }
+
+        .combo-mode {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background: 
+                radial-gradient(circle at center, rgba(255, 0, 255, 0.2) 0%, transparent 70%);
+            animation: combo-flash 0.3s ease-in-out;
+            z-index: 5;
+        }
+
+        @keyframes combo-flash {
+            0%, 100% { opacity: 0; }
+            50% { opacity: 1; }
+        }
+
+        .shake {
+            animation: retro-shake 0.5s ease-in-out;
+        }
+
+        @keyframes retro-shake {
+            0%, 100% { transform: translateX(0); }
+            10% { transform: translateX(-4px); }
+            20% { transform: translateX(4px); }
+            30% { transform: translateX(-4px); }
+            40% { transform: translateX(4px); }
+            50% { transform: translateX(-2px); }
+            60% { transform: translateX(2px); }
+            70% { transform: translateX(-2px); }
+            80% { transform: translateX(2px); }
+            90% { transform: translateX(-1px); }
+        }
+
+        .glitch {
+            animation: retro-glitch 0.4s ease-in-out;
+        }
+
+        @keyframes retro-glitch {
+            0% { 
+                transform: translate(0);
+                filter: hue-rotate(0deg) saturate(1);
+            }
+            20% { 
+                transform: translate(-4px, 2px);
+                filter: hue-rotate(90deg) saturate(1.5);
+            }
+            40% { 
+                transform: translate(-2px, -4px);
+                filter: hue-rotate(180deg) saturate(2);
+            }
+            60% { 
+                transform: translate(4px, 2px);
+                filter: hue-rotate(270deg) saturate(1.5);
+            }
+            80% { 
+                transform: translate(2px, -2px);
+                filter: hue-rotate(360deg) saturate(1);
+            }
+            100% { 
+                transform: translate(0);
+                filter: hue-rotate(0deg) saturate(1);
+            }
+        }
+
+        .level-indicator {
+            position: absolute;
+            top: 120px;
+            left: 50px;
+            font-size: 18px;
+            font-weight: 700;
+            color: #ff00ff;
+            text-shadow: 0 0 15px currentColor;
+            letter-spacing: 2px;
+        }
+
+        .combo-counter {
+            position: absolute;
+            top: 120px;
+            right: 50px;
+            font-size: 18px;
+            font-weight: 700;
+            color: #ffff00;
+            text-shadow: 0 0 15px currentColor;
+            letter-spacing: 2px;
+        }
+
+        @media (max-width: 768px) {
+            .prompt { font-size: 48px; }
+            .score { font-size: 24px; top: 30px; right: 30px; }
+            .leaderboard-btn { top: 30px; left: 30px; padding: 10px 15px; font-size: 12px; }
+            .progress-bars { bottom: 30px; width: 90%; }
+            .tutorial h1 { font-size: 48px; }
+            .tutorial p { font-size: 18px; }
+            .start-btn { font-size: 20px; padding: 20px 30px; }
+            .level-indicator, .combo-counter { font-size: 14px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="crt-overlay"></div>
+    
+    <div class="game-container" id="gameContainer">
+        <div class="arcade-border"></div>
+        
+        <div class="tutorial" id="tutorial">
+            <h1>DECISION LOOP</h1>
+            <p>▼ RETRO ARCADE CHALLENGE ▼</p>
+            <p>>>> TAP when you see "TAP" <<<</p>
+            <p>>>> SWIPE in the direction of arrows <<<</p>
+            <p>>>> DON'T TAP when you see "DON'T TAP" <<<</p>
+            <p>>>> You have exactly 1 second per decision <<<</p>
+            <p>SURVIVE THE DIGITAL GAUNTLET!</p>
+            <button class="start-btn" onclick="startGame()">► START GAME ◄</button>
+        </div>
+
+        <div class="timer-ring" id="timerRing"></div>
+        
+        <div class="prompt" id="prompt">TAP</div>
+        
+        <div class="score" id="score">SCORE: 0</div>
+        <div class="level-indicator" id="levelIndicator">LEVEL: 1</div>
+        <div class="combo-counter" id="comboCounter">COMBO: 0</div>
+        
+        <button class="leaderboard-btn" id="leaderboardBtn">★ HIGH SCORE ★</button>
+        
+        <div class="progress-bars">
+            <div class="bar-container">
+                <div class="bar-label">SURVIVAL</div>
+                <div class="bar">
+                    <div class="bar-fill survival-fill" id="survivalBar" style="width: 50%"></div>
+                    <div class="bar-value" id="survivalValue">50%</div>
+                </div>
+            </div>
+            <div class="bar-container">
+                <div class="bar-label">RISK LEVEL</div>
+                <div class="bar">
+                    <div class="bar-fill risk-fill" id="riskBar" style="width: 0%"></div>
+                    <div class="bar-value" id="riskValue">0%</div>
+                </div>
+            </div>
+            <div class="bar-container">
+                <div class="bar-label">MULTIPLIER</div>
+                <div class="bar">
+                    <div class="bar-fill multiplier-fill" id="multiplierBar" style="width: 20%"></div>
+                    <div class="bar-value" id="multiplierValue">1.0x</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="game-over" id="gameOver">
+            <h2>GAME OVER</h2>
+            <p id="finalScore">FINAL SCORE: 0</p>
+            <p id="bestScore">HIGH SCORE: 0</p>
+            <p id="levelReached">LEVEL REACHED: 1</p>
+            <p>>>> PRESS TO CONTINUE <<<</p>
+            <button class="restart-btn" onclick="restartGame()">► RESTART ◄</button>
+        </div>
+    </div>
+
+    <script>
+        // Game state
+        let gameState = {
+            isPlaying: false,
+            score: 0,
+            level: 1,
+            survival: 50,
+            risk: 0,
+            multiplier: 1.0,
+            consecutiveCorrect: 0,
+            currentPrompt: '',
+            promptStartTime: 0,
+            gameSpeed: 1000,
+            promptCount: 0,
+            bestScore: parseInt(localStorage.getItem('retroBestScore') || '0'),
+            isComboMode: false,
+            patterns: [],
+            totalPrompts: 0
+        };
+
+        // Enhanced prompt types with retro feel
+        const prompts = {
+            basic: ['TAP', '↑', '↓', '←', '→'],
+            reverse: ['DON\'T TAP'],
+            special: ['HOLD', 'DOUBLE TAP']
+        };
+
+        // Retro 8-bit style audio
+        let audioContext;
+        
+        function initAudio() {
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            } catch (e) {
+                console.log('Audio not supported');
+            }
+        }
+
+        function playRetroSound(frequency, duration, type = 'square', modulation = false) {
+            if (!audioContext) return;
+            
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = frequency;
+            oscillator.type = type;
+            
+            if (modulation) {
+                const lfo = audioContext.createOscillator();
+                const lfoGain = audioContext.createGain();
+                lfo.frequency.value = 5;
+                lfoGain.gain.value = 20;
+                lfo.connect(lfoGain);
+                lfoGain.connect(oscillator.frequency);
+                lfo.start();
+                lfo.stop(audioContext.currentTime + duration);
+            }
+            
+            gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + duration);
+        }
+
+        function startGame() {
+            initAudio();
+            document.getElementById('tutorial').style.display = 'none';
+            
+            // Reset game state
+            gameState.isPlaying = true;
+            gameState.score = 0;
+            gameState.level = 1;
+            gameState.survival = 50;
+            gameState.risk = 0;
+            gameState.multiplier = 1.0;
+            gameState.consecutiveCorrect = 0;
+            gameState.promptCount = 0;
+            gameState.totalPrompts = 0;
+            gameState.gameSpeed = 1000;
+            
+            updateUI();
+            nextPrompt();
+            
+            // Play start sound
+            playRetroSound(440, 0.2, 'square');
+            setTimeout(() => playRetroSound(660, 0.2, 'square'), 200);
+            
+            // Event listeners
+            document.addEventListener('click', handleTap);
+            document.addEventListener('keydown', handleKeyboard);
+            document.addEventListener('touchstart', handleTouch);
+            
+            // Enhanced swipe detection
+            let startX, startY;
+            document.addEventListener('touchstart', (e) => {
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+            });
+            
+            document.addEventListener('touchend', (e) => {
+                if (!startX || !startY || !gameState.isPlaying) return;
+                
+                const endX = e.changedTouches[0].clientX;
+                const endY = e.changedTouches[0].clientY;
+                
+                const diffX = startX - endX;
+                const diffY = startY - endY;
+                
+                const minSwipeDistance = 30;
+                
+                if (Math.abs(diffX) > Math.abs(diffY)) {
+                    if (diffX > minSwipeDistance) handleInput('←');
+                    else if (diffX < -minSwipeDistance) handleInput('→');
+                } else {
+                    if (diffY > minSwipeDistance) handleInput('↑');
+                    else if (diffY < -minSwipeDistance) handleInput('↓');
+                }
+                
+                startX = startY = null;
+            });
+        }
+
+        function generatePrompt() {
+            const rand = Math.random();
+            let promptType;
+            
+            // Level-based difficulty progression
+            const levelDifficulty = Math.min(gameState.level / 10, 0.6);
+            const reverseChance = 0.2 + levelDifficulty;
+            
+            if (rand < 0.7 - levelDifficulty) {
+                promptType = 'basic';
+            } else {
+                promptType = 'reverse';
+            }
+            
+            const promptList = prompts[promptType];
+            return promptList[Math.floor(Math.random() * promptList.length)];
+        }
+
+        function nextPrompt() {
+            if (!gameState.isPlaying) return;
+            
+            gameState.currentPrompt = generatePrompt();
+            gameState.promptStartTime = Date.now();
+            gameState.promptCount++;
+            gameState.totalPrompts++;
+            
+            // Level progression
+            if (gameState.totalPrompts % 20 === 0) {
+                gameState.level++;
+                gameState.gameSpeed = Math.max(600, gameState.gameSpeed - 30);
+                playRetroSound(880, 0.3, 'square', true);
+            }
+            
+            // Update prompt display
+            const promptEl = document.getElementById('prompt');
+            promptEl.textContent = gameState.currentPrompt;
+            promptEl.style.color = getRetroPromptColor(gameState.currentPrompt);
+            
+            // Reset timer ring
+            const timerRing = document.getElementById('timerRing');
+            timerRing.classList.remove('shrinking');
+            timerRing.offsetHeight;
+            timerRing.classList.add('shrinking');
+            
+            // Set timeout for decision window
+            setTimeout(() => {
+                if (gameState.isPlaying && Date.now() - gameState.promptStartTime >= gameState.gameSpeed) {
+                    handleMissedInput();
+                }
+            }, gameState.gameSpeed);
+        }
+
+        function getRetroPromptColor(prompt) {
+            switch (prompt) {
+                case 'TAP': return '#00ff00';
+                case 'DON\'T TAP': return '#ff0000';
+                case '↑': return '#00ffff';
+                case '↓': return '#00ffff';
+                case '←': return '#00ffff';
+                case '→': return '#00ffff';
+                default: return '#ffffff';
+            }
+        }
+
+        function handleTap(e) {
+            if (!gameState.isPlaying) return;
+            e.preventDefault();
+            handleInput('TAP');
+        }
+
+        function handleKeyboard(e) {
+            if (!gameState.isPlaying) return;
+            
+            switch (e.key) {
+                case ' ':
+                case 'Enter':
+                    e.preventDefault();
+                    handleInput('TAP');
+                    break;
+                case 'ArrowUp':
+                case 'w':
+                case 'W':
+                    e.preventDefault();
+                    handleInput('↑');
+                    break;
+                case 'ArrowDown':
+                case 's':
+                case 'S':
+                    e.preventDefault();
+                    handleInput('↓');
+                    break;
+                case 'ArrowLeft':
+                case 'a':
+                case 'A':
+                    e.preventDefault();
+                    handleInput('←');
+                    break;
+                case 'ArrowRight':
+                case 'd':
+                case 'D':
+                    e.preventDefault();
+                    handleInput('→');
+                    break;
+            }
+        }
+
+        function handleTouch(e) {
+            if (e.target.closest('.restart-btn') || e.target.closest('.start-btn')) return;
+            if (!gameState.isPlaying) return;
+            e.preventDefault();
+        }
+
+        function handleInput(input) {
+            if (!gameState.isPlaying) return;
+            
+            const timeTaken = Date.now() - gameState.promptStartTime;
+            if (timeTaken > gameState.gameSpeed) return;
+            
+            const isCorrect = checkInput(input, gameState.currentPrompt);
+            
+            if (isCorrect) {
+                handleCorrectInput(input);
+                // Retro success sound
+                playRetroSound(660 + (gameState.multiplier * 50), 0.15, 'square');
+            } else {
+                handleIncorrectInput();
+                // Retro error sound
+                playRetroSound(150, 0.4, 'sawtooth');
+            }
+            
+            updateUI();
+            
+            if (gameState.isPlaying) {
+                setTimeout(nextPrompt, 300);
+            }
+        }
+
+        function checkInput(input, prompt) {
+            if (prompt === 'DON\'T TAP' && input === 'TAP') return false;
+            if (prompt === 'DON\'T TAP' && input !== 'TAP') return true;
+            return input === prompt;
+        }
+
+        function handleCorrectInput(input) {
+            gameState.consecutiveCorrect++;
+            
+            // Enhanced survival system
+            gameState.survival += 8 + Math.floor(gameState.level / 3);
+            if (gameState.survival > 100) gameState.survival = 100;
+            
+            // Risk system with level scaling
+            const isBoldChoice = (gameState.currentPrompt === 'TAP' && Math.random() > 0.6) || 
+                               (gameState.currentPrompt !== 'DON\'T TAP' && Math.random() > 0.8);
+            if (isBoldChoice) {
+                gameState.risk += 12 + Math.floor(gameState.level / 2);
+                if (gameState.risk > 100) gameState.risk = 100;
+            }
+            
+            // Multiplier progression
+            if (gameState.consecutiveCorrect % 3 === 0) {
+                gameState.multiplier = Math.min(8.0, gameState.multiplier + 0.3);
+            }
+            
+            // Score calculation with retro arcade scaling
+            const baseScore = 100;
+            const levelBonus = gameState.level * 10;
+            const riskMultiplier = 1 + (gameState.risk / 80);
+            const speedBonus = Math.max(1, (1200 - gameState.gameSpeed) / 200);
+            const scoreIncrease = Math.floor((baseScore + levelBonus) * gameState.multiplier * riskMultiplier * speedBonus);
+            gameState.score += scoreIncrease;
+            
+            // Combo mode activation
+            if (gameState.consecutiveCorrect === 8) {
+                activateComboMode();
+            }
+            
+            // Visual feedback effects
+            if (gameState.survival >= 95) {
+                document.getElementById('survivalBar').parentElement.classList.add('shake');
+                setTimeout(() => {
+                    document.getElementById('survivalBar').parentElement.classList.remove('shake');
+                }, 600);
+            }
+            
+            // Perfect streak bonus
+            if (gameState.consecutiveCorrect % 10 === 0) {
+                playRetroSound(880, 0.2, 'square');
+                setTimeout(() => playRetroSound(1100, 0.2, 'square'), 100);
+            }
+        }
+
+        function handleIncorrectInput() {
+            gameState.consecutiveCorrect = 0;
+            gameState.multiplier = Math.max(1.0, gameState.multiplier - 0.5);
+            gameState.survival -= 25 + Math.floor(gameState.level / 2);
+            gameState.risk = Math.max(0, gameState.risk - 15);
+            
+            if (gameState.survival <= 0) {
+                gameOver();
+            } else {
+                // Critical health visual effects
+                if (gameState.survival <= 15) {
+                    document.body.classList.add('glitch');
+                    setTimeout(() => document.body.classList.remove('glitch'), 400);
+                    playRetroSound(200, 0.1, 'sawtooth');
+                }
+            }
+        }
+
+        function handleMissedInput() {
+            gameState.consecutiveCorrect = 0;
+            gameState.multiplier = 1.0;
+            gameState.survival -= 35 + Math.floor(gameState.level / 2);
+            
+            if (gameState.survival <= 0) {
+                gameOver();
+            } else {
+                playRetroSound(100, 0.3, 'sawtooth');
+            }
+        }
+
+        function activateComboMode() {
+            gameState.isComboMode = true;
+            const originalSpeed = gameState.gameSpeed;
+            gameState.gameSpeed = Math.max(400, gameState.gameSpeed - 200);
+            
+            // Visual combo effect
+            const comboEl = document.createElement('div');
+            comboEl.className = 'combo-mode';
+            document.getElementById('gameContainer').appendChild(comboEl);
+            
+            // Combo mode sound sequence
+            playRetroSound(440, 0.2, 'square');
+            setTimeout(() => playRetroSound(660, 0.2, 'square'), 200);
+            setTimeout(() => playRetroSound(880, 0.3, 'square', true), 400);
+            
+            setTimeout(() => {
+                comboEl.remove();
+                gameState.isComboMode = false;
+                gameState.gameSpeed = originalSpeed;
+            }, 6000);
+        }
+
+        function updateUI() {
+            // Update score with retro formatting
+            document.getElementById('score').textContent = `SCORE: ${gameState.score.toLocaleString()}`;
+            
+            // Update level and combo
+            document.getElementById('levelIndicator').textContent = `LEVEL: ${gameState.level}`;
+            document.getElementById('comboCounter').textContent = `COMBO: ${gameState.consecutiveCorrect}`;
+            
+            // Update progress bars
+            document.getElementById('survivalBar').style.width = `${Math.max(0, gameState.survival)}%`;
+            document.getElementById('survivalValue').textContent = `${Math.max(0, Math.round(gameState.survival))}%`;
+            
+            document.getElementById('riskBar').style.width = `${gameState.risk}%`;
+            document.getElementById('riskValue').textContent = `${Math.round(gameState.risk)}%`;
+            
+            const multiplierPercent = ((gameState.multiplier - 1) / 7) * 100; // Scale 1-8 to 0-100%
+            document.getElementById('multiplierBar').style.width = `${Math.min(100, multiplierPercent)}%`;
+            document.getElementById('multiplierValue').textContent = `${gameState.multiplier.toFixed(1)}x`;
+            
+            // Enhanced bar effects
+            const survivalBar = document.getElementById('survivalBar');
+            if (gameState.survival <= 15) {
+                survivalBar.style.animation = 'retro-pulse 0.3s ease-in-out infinite';
+                survivalBar.style.boxShadow = '0 0 25px #ff0000';
+            } else if (gameState.survival >= 90) {
+                survivalBar.style.animation = 'retro-pulse 0.8s ease-in-out infinite';
+                survivalBar.style.boxShadow = '0 0 25px #00ff00';
+            } else {
+                survivalBar.style.animation = 'none';
+                survivalBar.style.boxShadow = '0 0 15px #00ff00';
+            }
+            
+            // Risk bar pulsing effect
+            const riskBar = document.getElementById('riskBar');
+            if (gameState.risk >= 80) {
+                riskBar.style.animation = 'retro-pulse 0.4s ease-in-out infinite';
+            } else {
+                riskBar.style.animation = 'none';
+            }
+            
+            // Multiplier bar effects
+            const multiplierBar = document.getElementById('multiplierBar');
+            if (gameState.isComboMode) {
+                multiplierBar.style.animation = 'retro-pulse 0.2s ease-in-out infinite';
+                multiplierBar.style.boxShadow = '0 0 30px #ff00ff';
+            } else {
+                multiplierBar.style.animation = 'none';
+                multiplierBar.style.boxShadow = '0 0 15px #ff00ff';
+            }
+        }
+
+        function gameOver() {
+            gameState.isPlaying = false;
+            
+            // Update best score
+            if (gameState.score > gameState.bestScore) {
+                gameState.bestScore = gameState.score;
+                localStorage.setItem('retroBestScore', gameState.bestScore.toString());
+                // New high score sound
+                playRetroSound(440, 0.3, 'square');
+                setTimeout(() => playRetroSound(660, 0.3, 'square'), 300);
+                setTimeout(() => playRetroSound(880, 0.5, 'square', true), 600);
+            }
+            
+            // Show game over screen
+            document.getElementById('finalScore').textContent = `FINAL SCORE: ${gameState.score.toLocaleString()}`;
+            document.getElementById('bestScore').textContent = `HIGH SCORE: ${gameState.bestScore.toLocaleString()}`;
+            document.getElementById('levelReached').textContent = `LEVEL REACHED: ${gameState.level}`;
+            document.getElementById('gameOver').style.display = 'block';
+            
+            // Game over effects
+            document.body.classList.add('glitch');
+            setTimeout(() => document.body.classList.remove('glitch'), 1500);
+            
+            // Game over sound sequence
+            playRetroSound(220, 0.4, 'sawtooth');
+            setTimeout(() => playRetroSound(180, 0.4, 'sawtooth'), 400);
+            setTimeout(() => playRetroSound(140, 0.6, 'sawtooth'), 800);
+        }
+
+        function restartGame() {
+            document.getElementById('gameOver').style.display = 'none';
+            startGame();
+        }
+
+        // Click anywhere to restart after game over
+        document.addEventListener('click', (e) => {
+            if (document.getElementById('gameOver').style.display === 'block' && 
+                !e.target.closest('.restart-btn')) {
+                restartGame();
+            }
+        });
+
+        // Risk passive decay with level scaling
+        setInterval(() => {
+            if (gameState.isPlaying && gameState.risk > 0) {
+                const decayRate = Math.max(0.5, 2 - (gameState.level * 0.1));
+                gameState.risk = Math.max(0, gameState.risk - decayRate);
+                updateUI();
+            }
+        }, 1000);
+
+        // Initialize best score display
+        document.addEventListener('DOMContentLoaded', () => {
+            gameState.bestScore = parseInt(localStorage.getItem('retroBestScore') || '0');
+        });
+
+        // Prevent context menu on mobile
+        document.addEventListener('contextmenu', (e) => e.preventDefault());
+        
+        // Prevent zoom on double tap
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', (e) => {
+            const now = (new Date()).getTime();
+            if (now - lastTouchEnd <= 300) {
+                e.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, false);
+    </script>
+</body>
+</html>
