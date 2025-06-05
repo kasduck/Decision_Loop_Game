@@ -19,7 +19,6 @@ This isn’t just a game—it’s a cyberpunk rebellion. With glowing neon green
 ```
 
 ![Game Screenshot](https://raw.githubusercontent.com/kasduck/Decision_Loop_Game/refs/heads/main/SS1.png)  
-*Replace with a screenshot hosted on GitHub/Imgur for max impact.*
 
 ---
 
@@ -85,7 +84,6 @@ Ready to hack the Grid? Follow these steps:
 5. **Tweak Settings**: Hit ⚙️ to toggle tilt, colorblind mode, dark mode, mind challenges, or GDPR opt-in.
 
 ![Settings Modal](https://raw.githubusercontent.com/kasduck/Decision_Loop_Game/refs/heads/main/SS2.png)  
-*Replace with a hosted image of the settings modal.*
 
 ---
 
@@ -143,7 +141,6 @@ After 100 prompts, unlock a journal of memorized patterns (e.g., “TAP, ↑, DO
 | **Accessibility** | WCAG 2.1 AA partial compliance (ARIA labels, colorblind mode). |
 
 ![Game Over Screen](https://raw.githubusercontent.com/kasduck/Decision_Loop_Game/refs/heads/main/SS3.png)  
-*Replace with a hosted game over screenshot.*
 
 ---
 
@@ -170,7 +167,7 @@ After 100 prompts, unlock a journal of memorized patterns (e.g., “TAP, ↑, DO
 
 ## 🧑‍💻 Credits
 
-- **Neurojacker**: [Your Name] – Forged in Neon City’s shadows.
+- **Neurojacker**: [Kasduck] – Forged in Neon City’s shadows.
 - **Inspiration**: *Tron*, *Neuromancer*, 1980s arcades, behavioral psych (Skinner, Csikszentmihalyi, Kahneman).
 - **Assets**: Google Fonts (Orbitron), freesound.org (WAVs).
 
